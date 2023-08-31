@@ -676,6 +676,22 @@ export default function AgentPage() {
 
                 <Divider sx={{ my: 4 }} />
 
+                <RateLimitForm
+                  onSubmit={handleRateLimit}
+                  rateLimit={
+                    (agent.interfaceConfig as AgentInterfaceConfig).rateLimit
+                  }
+                  rateLimitInterval={
+                    (agent.interfaceConfig as AgentInterfaceConfig)
+                      .rateLimitInterval
+                  }
+                  rateLimitMessage={
+                    (agent.interfaceConfig as AgentInterfaceConfig)
+                      .rateLimitMessage
+                  }
+                />
+
+                <Divider sx={{ my: 4 }} />
                 <FormControl sx={{ gap: 1 }}>
                   <FormLabel>Agent ID</FormLabel>
                   <Typography level="body3" mb={2}>
@@ -716,22 +732,6 @@ export default function AgentPage() {
                     </Alert>
                   </Stack>
                 </FormControl>
-
-                <Divider sx={{ my: 4 }} />
-                <RateLimitForm
-                  onSubmit={handleRateLimit}
-                  rateLimit={
-                    (agent.interfaceConfig as AgentInterfaceConfig).rateLimit
-                  }
-                  rateLimitInterval={
-                    (agent.interfaceConfig as AgentInterfaceConfig)
-                      .rateLimitInterval
-                  }
-                  rateLimitMessage={
-                    (agent.interfaceConfig as AgentInterfaceConfig)
-                      .rateLimitMessage
-                  }
-                />
 
                 <Divider sx={{ my: 4 }} />
                 <FormControl sx={{ gap: 1 }}>
