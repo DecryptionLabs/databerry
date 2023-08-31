@@ -25,6 +25,7 @@ type Props = {
   localStorageConversationIdKey?: string;
   isRateExceeded?: boolean;
   rateExceededMessage?: string;
+  trackRate?: boolean;
 };
 
 export const handleEvalAnswer = async (props: {
@@ -51,6 +52,7 @@ const useChat = ({
   queryBody,
   isRateExceeded,
   rateExceededMessage,
+  trackRate = false,
   ...otherProps
 }: Props) => {
   const localStorageConversationIdKey =
@@ -132,14 +134,20 @@ const useChat = ({
       return;
     }
 
-    if (isRateExceeded) {
-      setState({
-        history: [
-          ...state.history,
-          { from: 'agent', message: rateExceededMessage },
-        ] as any,
-      });
-      return;
+    if (trackRate) {
+      if (isRateExceeded) {
+        setState({
+          history: [
+            ...state.history,
+            { from: 'agent', message: rateExceededMessage },
+          ] as any,
+        });
+        return;
+      }
+
+      let currentRateCount =
+        Number(localStorage.getItem('rateLimitCount')) || 0;
+      localStorage.setItem('rateLimitCount', `${currentRateCount++}`);
     }
 
     const ctrl = new AbortController();
@@ -308,6 +316,13 @@ const useChat = ({
       });
     } catch (err) {
       console.error('err', err);
+      // should decrement if there is an error
+      if (trackRate) {
+        let currentRateCount =
+          Number(localStorage.getItem('rateLimitCount')) || 0;
+        localStorage.setItem('rateLimitCount', `${currentRateCount--}`);
+      }
+
       if (err instanceof ApiError) {
         if (err?.message) {
           error = err?.message;
@@ -389,4 +404,3 @@ const useChat = ({
 };
 
 export default useChat;
-

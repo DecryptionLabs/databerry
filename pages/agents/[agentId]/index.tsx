@@ -69,6 +69,7 @@ import useStateReducer from '@app/hooks/useStateReducer';
 import { upsertAgent } from '@app/pages/api/agents';
 import { getAgent } from '@app/pages/api/agents/[id]';
 import { RouteNames } from '@app/types';
+import { AgentInterfaceConfig } from '@app/types/models';
 import agentToolFormat from '@app/utils/agent-tool-format';
 import { fetcher, postFetcher } from '@app/utils/swr-fetcher';
 import { withAuth } from '@app/utils/withAuth';
@@ -166,18 +167,16 @@ export default function AgentPage() {
 
   const handleRateLimit = async (values: RateLimitFields) => {
     await toast.promise(
-      axios.post('/api/agents', {
+      upsertAgentMutation.trigger({
         ...getAgentQuery?.data,
         interfaceConfig: values,
-      }),
+      } as any),
       {
         loading: 'Updating...',
         success: 'Updated!',
         error: 'Something went wrong',
       }
     );
-
-    getAgentQuery.mutate();
   };
 
   const handleChangeTab = (tab: string) => {
@@ -719,7 +718,20 @@ export default function AgentPage() {
                 </FormControl>
 
                 <Divider sx={{ my: 4 }} />
-                <RateLimitForm onSubmit={handleRateLimit} />
+                <RateLimitForm
+                  onSubmit={handleRateLimit}
+                  rateLimit={
+                    (agent.interfaceConfig as AgentInterfaceConfig).rateLimit
+                  }
+                  rateLimitInterval={
+                    (agent.interfaceConfig as AgentInterfaceConfig)
+                      .rateLimitInterval
+                  }
+                  rateLimitMessage={
+                    (agent.interfaceConfig as AgentInterfaceConfig)
+                      .rateLimitMessage
+                  }
+                />
 
                 <Divider sx={{ my: 4 }} />
                 <FormControl sx={{ gap: 1 }}>

@@ -29,7 +29,6 @@ import { AgentInterfaceConfig } from '@app/types/models';
 import pickColorBasedOnBgColor from '@app/utils/pick-color-based-on-bgcolor';
 import { fetcher } from '@app/utils/swr-fetcher';
 
-
 export const theme = extendTheme({
   cssVarPrefix: 'databerry-chat-bubble',
   colorSchemes: {
@@ -93,6 +92,7 @@ function App(props: { agentId: string; initConfig?: AgentInterfaceConfig }) {
     channel: 'website',
     isRateExceeded,
     rateExceededMessage,
+    trackRate: true,
     // channel: ConversationChannel.website // not working with bundler parcel,
   });
 
@@ -104,7 +104,7 @@ function App(props: { agentId: string; initConfig?: AgentInterfaceConfig }) {
     );
   }, [state.config.primaryColor]);
 
-   useSWR<Agent>(`${API_URL}/api/agents/${props.agentId}`, fetcher, {
+  useSWR<Agent>(`${API_URL}/api/agents/${props.agentId}`, fetcher, {
     onSuccess: (data) => {
       const agentConfig = data?.interfaceConfig as AgentInterfaceConfig;
 

@@ -12,7 +12,6 @@ import { AgentInterfaceConfig } from '@app/types/models';
 import pickColorBasedOnBgColor from '@app/utils/pick-color-based-on-bgcolor';
 import { fetcher } from '@app/utils/swr-fetcher';
 
-
 const defaultChatBubbleConfig: AgentInterfaceConfig = {
   // displayName: 'Agent Smith',
   theme: 'light',
@@ -35,7 +34,7 @@ function ChatBoxFrame(props: { initConfig?: AgentInterfaceConfig }) {
     props.initConfig || defaultChatBubbleConfig
   );
 
-    const { isRateExceeded, rateExceededMessage } = useRateLimit({
+  const { isRateExceeded, rateExceededMessage } = useRateLimit({
     agentId: `${router.query?.agentId}`,
   });
 
@@ -52,6 +51,7 @@ function ChatBoxFrame(props: { initConfig?: AgentInterfaceConfig }) {
     channel: ConversationChannel.website,
     isRateExceeded,
     rateExceededMessage,
+    trackRate: true,
   });
 
   const primaryColor =
@@ -61,7 +61,7 @@ function ChatBoxFrame(props: { initConfig?: AgentInterfaceConfig }) {
     return pickColorBasedOnBgColor(primaryColor, '#ffffff', '#000000');
   }, [primaryColor]);
 
-   useSWR<Agent>(`${API_URL}/api/agents/${agentId}`, fetcher, {
+  useSWR<Agent>(`${API_URL}/api/agents/${agentId}`, fetcher, {
     onSuccess: (data) => {
       const agentConfig = data?.interfaceConfig as AgentInterfaceConfig;
 

@@ -16,9 +16,17 @@ export type RateLimitFields = z.infer<typeof rateLimitSchema>;
 
 interface IRateLimitFormProps {
   onSubmit(args: RateLimitFields): Promise<void>;
+  rateLimit?: number;
+  rateLimitInterval?: number;
+  rateLimitMessage?: string;
 }
 
-const RateLimitForm: React.FC<IRateLimitFormProps> = ({ onSubmit }) => {
+const RateLimitForm: React.FC<IRateLimitFormProps> = ({
+  onSubmit,
+  rateLimit,
+  rateLimitInterval,
+  rateLimitMessage,
+}) => {
   const { register, control, handleSubmit, setValue } =
     useForm<RateLimitFields>({
       resolver: zodResolver(rateLimitSchema),
@@ -39,6 +47,7 @@ const RateLimitForm: React.FC<IRateLimitFormProps> = ({ onSubmit }) => {
 
       <Input
         control={control as any}
+        defaultValue={rateLimit}
         sx={{
           mb: 2,
         }}
@@ -50,6 +59,7 @@ const RateLimitForm: React.FC<IRateLimitFormProps> = ({ onSubmit }) => {
         sx={{
           mb: 2,
         }}
+        defaultValue={rateLimitInterval}
         label='rateLimitInterval'
         {...register('rateLimitInterval')}
         onChange={(e) => {
@@ -61,7 +71,8 @@ const RateLimitForm: React.FC<IRateLimitFormProps> = ({ onSubmit }) => {
         sx={{
           mb: 2,
         }}
-        label='rateLimitReachedMessage'
+        defaultValue={rateLimitMessage}
+        label='rateLimitMessage'
         {...register('rateLimitMessage')}
       />
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
