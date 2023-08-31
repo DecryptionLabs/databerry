@@ -64,6 +64,7 @@ export const AgentInterfaceConfig = z.object({
   tiktokURL: z.string().optional(),
   githubURL: z.string().optional(),
   websiteURL: z.string().optional(),
+  isRateActive: z.boolean().optional(),
   rateLimit: z
     .number()
     .or(z.string().pipe(z.coerce.number().positive()))

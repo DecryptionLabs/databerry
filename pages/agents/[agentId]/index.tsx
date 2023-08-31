@@ -204,7 +204,7 @@ export default function AgentPage() {
   }
 
   const agent = getAgentQuery?.data;
-
+  const agentConfig = agent.interfaceConfig as AgentInterfaceConfig;
   return (
     <Box
       component="main"
@@ -678,17 +678,10 @@ export default function AgentPage() {
 
                 <RateLimitForm
                   onSubmit={handleRateLimit}
-                  rateLimit={
-                    (agent.interfaceConfig as AgentInterfaceConfig).rateLimit
-                  }
-                  rateLimitInterval={
-                    (agent.interfaceConfig as AgentInterfaceConfig)
-                      .rateLimitInterval
-                  }
-                  rateLimitMessage={
-                    (agent.interfaceConfig as AgentInterfaceConfig)
-                      .rateLimitMessage
-                  }
+                  rateLimit={agentConfig.rateLimit}
+                  rateLimitInterval={agentConfig.rateLimitInterval}
+                  rateLimitMessage={agentConfig.rateLimitMessage}
+                  isRateActive={agentConfig.isRateActive}
                 />
 
                 <Divider sx={{ my: 4 }} />

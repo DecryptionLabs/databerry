@@ -15,7 +15,6 @@ interface RateResponse {
 
 const useRateLimit = ({ agentId }: { agentId?: string }): RateResponse => {
   const [isRateExceeded, setIsRateExceeded] = useState(false);
-  // const [counter, setCounter] = useState(0);
 
   const getAgentQuery = useSWR<Agent>(
     agentId ? `${API_URL}/api/agents/${agentId}` : null,
@@ -29,7 +28,7 @@ const useRateLimit = ({ agentId }: { agentId?: string }): RateResponse => {
     let currentRateCount = Number(localStorage.getItem('rateLimitCount')) || 0;
     localStorage.setItem('rateLimitCount', `${++currentRateCount}`);
 
-    if (rateLimit > 0 && currentRateCount >= rateLimit) {
+    if (currentRateCount >= rateLimit) {
       setIsRateExceeded(true);
     }
   }, [rateLimit]);
@@ -39,14 +38,14 @@ const useRateLimit = ({ agentId }: { agentId?: string }): RateResponse => {
 
     const interval = setInterval(() => {
       localStorage.setItem('rateLimitCount', '0');
+      setIsRateExceeded(false);
     }, config?.rateLimitInterval * 1000);
 
     return () => clearInterval(interval);
   }, [config]);
 
-  // keep the current behaviour if rateLimit or rateLimitInterval is not provided
   return {
-    isRateExceeded,
+    isRateExceeded: config?.isRateActive ? isRateExceeded : false,
     handleIncrementRateLimitCount,
     rateExceededMessage: config?.rateLimitMessage || 'Usage limit reached',
   };
