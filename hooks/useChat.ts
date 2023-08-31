@@ -13,6 +13,7 @@ import type { ChatResponse, EvalAnswer } from '@app/types/dtos';
 import { ApiError, ApiErrorType } from '@app/utils/api-error';
 import { fetcher } from '@app/utils/swr-fetcher';
 
+import useRateLimit from './useRateLimit';
 import useStateReducer from './useStateReducer';
 
 const API_URL = process.env.NEXT_PUBLIC_DASHBOARD_URL;
@@ -26,6 +27,10 @@ type Props = {
   isRateExceeded?: boolean;
   rateExceededMessage?: string;
   trackRate?: boolean;
+  handleIncrementRateLimitCount?: () => any;
+  rateLimit?: number;
+  rateLimitMessage?: string;
+  agentId?: string;
 };
 
 export const handleEvalAnswer = async (props: {
@@ -46,15 +51,7 @@ export const handleEvalAnswer = async (props: {
 
 const LOCAL_STORAGE_CONVERSATION_ID_KEY = 'conversationId';
 
-const useChat = ({
-  endpoint,
-  channel,
-  queryBody,
-  isRateExceeded,
-  rateExceededMessage,
-  trackRate = false,
-  ...otherProps
-}: Props) => {
+const useChat = ({ endpoint, channel, queryBody, ...otherProps }: Props) => {
   const localStorageConversationIdKey =
     otherProps.localStorageConversationIdKey ||
     LOCAL_STORAGE_CONVERSATION_ID_KEY;
@@ -73,6 +70,11 @@ const useChat = ({
     }[],
     handleAbort: undefined as any,
   });
+
+  const { isRateExceeded, rateExceededMessage, handleIncrementRateLimitCount } =
+    useRateLimit({
+      agentId: otherProps.agentId,
+    });
 
   const getConversationQuery = useSWRInfinite<
     Prisma.PromiseReturnType<typeof getConversation>
@@ -134,20 +136,14 @@ const useChat = ({
       return;
     }
 
-    if (trackRate) {
-      if (isRateExceeded) {
-        setState({
-          history: [
-            ...state.history,
-            { from: 'agent', message: rateExceededMessage },
-          ] as any,
-        });
-        return;
-      }
-
-      let currentRateCount =
-        Number(localStorage.getItem('rateLimitCount')) || 0;
-      localStorage.setItem('rateLimitCount', `${currentRateCount++}`);
+    if (isRateExceeded) {
+      setState({
+        history: [
+          ...state.history,
+          { from: 'agent', message: rateExceededMessage },
+        ] as any,
+      });
+      return;
     }
 
     const ctrl = new AbortController();
@@ -314,14 +310,10 @@ const useChat = ({
           }
         },
       });
+
+      handleIncrementRateLimitCount?.();
     } catch (err) {
       console.error('err', err);
-      // should decrement if there is an error
-      if (trackRate) {
-        let currentRateCount =
-          Number(localStorage.getItem('rateLimitCount')) || 0;
-        localStorage.setItem('rateLimitCount', `${currentRateCount--}`);
-      }
 
       if (err instanceof ApiError) {
         if (err?.message) {

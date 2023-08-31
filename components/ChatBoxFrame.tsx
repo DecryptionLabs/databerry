@@ -34,10 +34,6 @@ function ChatBoxFrame(props: { initConfig?: AgentInterfaceConfig }) {
     props.initConfig || defaultChatBubbleConfig
   );
 
-  const { isRateExceeded, rateExceededMessage } = useRateLimit({
-    agentId: `${router.query?.agentId}`,
-  });
-
   const {
     history,
     handleChatSubmit,
@@ -48,10 +44,9 @@ function ChatBoxFrame(props: { initConfig?: AgentInterfaceConfig }) {
     handleAbort,
   } = useChat({
     endpoint: `/api/agents/${router.query?.agentId}/query`,
+
     channel: ConversationChannel.website,
-    isRateExceeded,
-    rateExceededMessage,
-    trackRate: true,
+    agentId,
   });
 
   const primaryColor =
@@ -61,8 +56,27 @@ function ChatBoxFrame(props: { initConfig?: AgentInterfaceConfig }) {
     return pickColorBasedOnBgColor(primaryColor, '#ffffff', '#000000');
   }, [primaryColor]);
 
-  useSWR<Agent>(`${API_URL}/api/agents/${agentId}`, fetcher, {
-    onSuccess: (data) => {
+  // TODO: find why onSuccess is not working
+  // useSWR<Agent>(`${API_URL}/api/agents/${agentId}`, fetcher, {
+  //   onSuccess: (data) => {
+  //     const agentConfig = data?.interfaceConfig as AgentInterfaceConfig;
+
+  //     setAgent(data);
+  //     setConfig({
+  //       ...defaultChatBubbleConfig,
+  //       ...agentConfig,
+  //     });
+  //   },
+  //   onError: (err) => {
+  //     console.error(err);
+  //   },
+  // });
+
+  const handleFetchAgent = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/agents/${agentId}`);
+      const data = (await res.json()) as Agent;
+
       const agentConfig = data?.interfaceConfig as AgentInterfaceConfig;
 
       setAgent(data);
@@ -70,11 +84,17 @@ function ChatBoxFrame(props: { initConfig?: AgentInterfaceConfig }) {
         ...defaultChatBubbleConfig,
         ...agentConfig,
       });
-    },
-    onError: (err) => {
+    } catch (err) {
       console.error(err);
-    },
-  });
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    if (agentId) {
+      handleFetchAgent();
+    }
+  }, [agentId]);
 
   useEffect(() => {
     if (props.initConfig) {

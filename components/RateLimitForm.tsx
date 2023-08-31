@@ -36,13 +36,13 @@ const RateLimitForm: React.FC<IRateLimitFormProps> = ({
     <form onSubmit={handleSubmit(onSubmit)}>
       <FormLabel>Rate Limit</FormLabel>
       <Typography
-        level='body3'
+        level="body3"
         sx={{
           mb: 2,
         }}
       >
         Limit the number of messages sent from one device on the Chat Bubble,
-        iFrame and Standalone integrations.
+        iFrame and Standalone integrations. (max X messages every Y seconds)
       </Typography>
 
       <Input
@@ -51,7 +51,7 @@ const RateLimitForm: React.FC<IRateLimitFormProps> = ({
         sx={{
           mb: 2,
         }}
-        label='rateLimit'
+        label="Rate Limit (max number of message). Set to 0 to disable."
         {...register('rateLimit')}
       />
       <Input
@@ -60,7 +60,7 @@ const RateLimitForm: React.FC<IRateLimitFormProps> = ({
           mb: 2,
         }}
         defaultValue={rateLimitInterval}
-        label='rateLimitInterval'
+        label="Interval (in seconds)"
         {...register('rateLimitInterval')}
         onChange={(e) => {
           console.log(typeof e.target.value);
@@ -72,14 +72,15 @@ const RateLimitForm: React.FC<IRateLimitFormProps> = ({
           mb: 2,
         }}
         defaultValue={rateLimitMessage}
-        label='rateLimitMessage'
+        label="Rate Limit Reached Message"
+        placeholder="Usage limit reached"
         {...register('rateLimitMessage')}
       />
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Button
-          type='submit'
-          variant='solid'
-          color='primary'
+          type="submit"
+          variant="solid"
+          color="primary"
           sx={{ ml: 2, mt: 2 }} // Adjust the margin as needed
         >
           Save

@@ -73,10 +73,6 @@ function App(props: { agentId: string; initConfig?: AgentInterfaceConfig }) {
     visitorEmail: '',
   });
 
-  const { isRateExceeded, rateExceededMessage } = useRateLimit({
-    agentId: props.agentId,
-  });
-
   const {
     history,
     handleChatSubmit,
@@ -90,10 +86,8 @@ function App(props: { agentId: string; initConfig?: AgentInterfaceConfig }) {
   } = useChat({
     endpoint: `${API_URL}/api/agents/${props.agentId}/query`,
     channel: 'website',
-    isRateExceeded,
-    rateExceededMessage,
-    trackRate: true,
     // channel: ConversationChannel.website // not working with bundler parcel,
+    agentId: props?.agentId,
   });
 
   const textColor = useMemo(() => {
@@ -104,8 +98,27 @@ function App(props: { agentId: string; initConfig?: AgentInterfaceConfig }) {
     );
   }, [state.config.primaryColor]);
 
-  useSWR<Agent>(`${API_URL}/api/agents/${props.agentId}`, fetcher, {
-    onSuccess: (data) => {
+  // TODO: find why onSuccess is not working
+  // useSWR<Agent>(`${API_URL}/api/agents/${agentId}`, fetcher, {
+  //   onSuccess: (data) => {
+  //     const agentConfig = data?.interfaceConfig as AgentInterfaceConfig;
+
+  //     setAgent(data);
+  //     setConfig({
+  //       ...defaultChatBubbleConfig,
+  //       ...agentConfig,
+  //     });
+  //   },
+  //   onError: (err) => {
+  //     console.error(err);
+  //   },
+  // });
+
+  const handleFetchAgent = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/agents/${props.agentId}`);
+      const data = (await res.json()) as Agent;
+
       const agentConfig = data?.interfaceConfig as AgentInterfaceConfig;
 
       setState({
@@ -115,11 +128,17 @@ function App(props: { agentId: string; initConfig?: AgentInterfaceConfig }) {
           ...agentConfig,
         },
       });
-    },
-    onError: (err) => {
+    } catch (err) {
       console.error(err);
-    },
-  });
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    if (props.agentId) {
+      handleFetchAgent();
+    }
+  }, [props.agentId]);
 
   useEffect(() => {
     if (state.config?.initialMessage) {
