@@ -7,6 +7,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig = {
   experimental: {
     appDir: true,
+    outputFileTracingIgnores: ['canvas'],
   },
   eslint: {
     dirs: ['pages', 'utils', 'components', 'hooks', 'types', 'widgets'],
@@ -139,7 +140,6 @@ const nextConfig = {
       ],
     };
   },
-  outputFileTracingIgnores: ['canvas'],
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     config.externals.push({
       playwright: true,
